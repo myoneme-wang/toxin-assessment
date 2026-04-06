@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>體內毒素負荷評估問卷 | Toxin Burden Assessment</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang TC','Microsoft JhengHei','Noto Sans TC',sans-serif;background:#f0f4f8;color:#2d3748;line-height:1.6}
+    .hdr{background:linear-gradient(135deg,#0d2744 0%,#1a365d 50%,#2b6cb0 100%);color:#fff;padding:52px 24px 44px;text-align:center}
+    .hdr-ico{font-size:52px;margin-bottom:16px}
+    .hdr h1{font-size:1.9rem;font-weight:800;letter-spacing:-.5px;margin-bottom:6px}
+    .hdr h2{font-size:.95rem;font-weight:400;opacity:.8;margin-bottom:16px;letter-spacing:1px}
+    .hdr-desc{max-width:640px;margin:0 auto;background:rgba(255,255,255,.12);border-radius:12px;padding:14px 20px;font-size:.86rem;line-height:1.7;opacity:.93}
+    .wrap{max-width:880px;margin:0 auto;padding:28px 16px 60px}
+    .disc{background:#fffbeb;border-left:4px solid #f59e0b;border-radius:10px;padding:14px 18px;margin-bottom:24px;font-size:.83rem;color:#78350f}
+    .disc strong{color:#92400e}
+    .pgbox{background:#fff;border-radius:14px;padding:16px 22px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,.07);position:sticky;top:8px;z-index:10}
+    .pgrow{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+    .pglbl{font-size:.8rem;color:#718096}
+    .pgnum{font-weight:700;color:#2b6cb0;font-size:.88rem}
+    .pgtrack{height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden}
+    .pgfill{height:100%;background:linear-gradient(90deg,#2b6cb0,#4299e1);border-radius:4px;transition:width .3s ease;width:0%}
+    .sec{background:#fff;border-radius:16px;padding:26px 26px 18px;margin-bottom:18px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+    .sechd{display:flex;align-items:center;gap:14px;margin-bottom:16px;padding-bottom:14px;border-bottom:2px solid #f0f4f8}
+    .secico{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+    .secinfo h3{font-size:1rem;font-weight:700;color:#1a365d}
+    .secinfo p{font-size:.77rem;color:#718096;margin-top:1px}
+    .badge{display:inline-block;background:#ebf8ff;color:#2b6cb0;border-radius:7px;padding:1px 9px;font-size:.7rem;font-weight:600;margin-left:7px;vertical-align:middle}
+    .qi{display:flex;align-items:flex-start;gap:13px;padding:12px 9px;cursor:pointer;border-radius:9px;transition:background .13s;border-bottom:1px solid #f7fafc}
+    .qi:last-child{border-bottom:none}
+    .qi:hover{background:#f7fafc}
+    .qi.ck{background:#ebf8ff}
+    .qi input[type=checkbox]{width:19px;height:19px;border-radius:4px;accent-color:#2b6cb0;cursor:pointer;flex-shrink:0;margin-top:3px}
+    .qlbl{flex:1}
+    .qzh{font-size:.91rem;font-weight:500;color:#2d3748}
+    .qen{font-size:.77rem;color:#a0aec0;margin-top:2px}
+    .subwrap{text-align:center;margin:32px 0}
+    .subbtn{background:linear-gradient(135deg,#2b6cb0,#4299e1);color:#fff;border:none;padding:16px 52px;font-size:1rem;font-weight:700;border-radius:50px;cursor:pointer;box-shadow:0 4px 18px rgba(66,153,225,.4);transition:all .2s;letter-spacing:.5px}
+    .subbtn:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(66,153,225,.5)}
+    .subnote{font-size:.78rem;color:#a0aec0;margin-top:9px}
+    #res{display:none;animation:fi .5s ease}
+    @keyframes fi{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    .rbanner{text-align:center;padding:42px 24px;background:linear-gradient(135deg,#0d2744,#1a365d,#2b6cb0);color:#fff;border-radius:16px;margin-bottom:22px}
+    .rbanner h2{font-size:1.45rem;font-weight:700;margin-bottom:7px}
+    .rbanner p{opacity:.8;font-size:.88rem;margin-bottom:14px}
+    .chips{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+    .chip{background:rgba(255,255,255,.18);border-radius:50px;padding:7px 20px;font-size:.83rem;font-weight:600}
+    .chartbox{background:#fff;border-radius:16px;padding:30px;margin-bottom:18px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+    .ctitle{font-size:1rem;font-weight:700;color:#1a365d;margin-bottom:3px}
+    .csub{font-size:.8rem;color:#718096;margin-bottom:22px}
+    .clay{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+    .ccw{flex:0 0 250px;max-width:250px}
+    .cleg{flex:1;min-width:170px}
+    .legitem{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:8px;margin-bottom:3px}
+    .legitem:hover{background:#f7fafc}
+    .legdot{width:13px;height:13px;border-radius:50%;flex-shrink:0}
+    .legname{flex:1;font-size:.86rem;font-weight:600}
+    .legpct{font-size:.86rem;font-weight:700}
+    @media(max-width:540px){.ccw{flex:0 0 100%;max-width:220px;margin:0 auto}.cleg{width:100%}}
+    .catgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:13px;margin-bottom:18px}
+    .catcard{background:#fff;border-radius:13px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,.06);border-left:5px solid}
+    .cchd{display:flex;align-items:center;gap:9px;margin-bottom:12px}
+    .ccico{font-size:24px}
+    .cczh{font-size:.95rem;font-weight:700}
+    .ccen{font-size:.7rem;color:#718096}
+    .ccbar{height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;margin-bottom:7px}
+    .ccfill{height:100%;border-radius:3px}
+    .ccpct{font-size:1.45rem;font-weight:800;margin-bottom:3px}
+    .rbadge{display:inline-block;padding:2px 10px;border-radius:11px;font-size:.7rem;font-weight:600}
+    .rh{background:#fed7d7;color:#c53030}
+    .rm{background:#fefcbf;color:#744210}
+    .rl{background:#c6f6d5;color:#276749}
+    .rn{background:#e2e8f0;color:#718096}
+    .recbox{background:#fff;border-radius:16px;padding:30px;margin-bottom:18px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+    .recbox h3{font-size:1rem;font-weight:700;color:#1a365d;margin-bottom:18px;padding-bottom:12px;border-bottom:2px solid #f0f4f8}
+    .reccard{background:#f7fafc;border-radius:11px;padding:16px 18px;margin-bottom:10px}
+    .reccard h4{font-size:.88rem;font-weight:700;margin-bottom:5px}
+    .reccard p{font-size:.8rem;color:#4a5568;line-height:1.7}
+    .reccard ul{font-size:.8rem;color:#4a5568;margin:5px 0 8px 16px;line-height:1.9}
+    .fin{background:linear-gradient(135deg,#ebf8ff,#e0f2fe);border-radius:16px;padding:26px;text-align:center;margin-bottom:28px}
+    .fin h4{color:#1a365d;font-size:.97rem;font-weight:700;margin-bottom:9px}
+    .fin p{color:#2c5282;font-size:.82rem;line-height:1.75}
+    .fin a{color:#2b6cb0}
+    .rstwrap{text-align:center;margin-bottom:18px}
+    .rstbtn{background:#fff;color:#2b6cb0;border:2px solid #2b6cb0;padding:11px 36px;font-size:.9rem;font-weight:600;border-radius:50px;cursor:pointer;transition:all .2s}
+    .rstbtn:hover{background:#2b6cb0;color:#fff}
+    @media(max-width:500px){.hdr h1{font-size:1.45rem}.sec{padding:18px 14px 12px}.catgrid{grid-template-columns:1fr 1fr}}
+    @media(max-width:360px){.catgrid{grid-template-columns:1fr}}
+  
+    .aroma-link-wrap{text-align:center;margin:2rem 0 1rem}
+    .aroma-link-btn{display:inline-flex;align-items:center;gap:.6rem;
+      padding:.85rem 2rem;background:linear-gradient(135deg,#5a8a4a,#7cb86a);
+      color:#fff;border:none;border-radius:40px;font-size:1rem;font-weight:700;
+      cursor:pointer;text-decoration:none;box-shadow:0 6px 20px rgba(90,138,74,.35);
+      transition:transform .2s,box-shadow .2s}
+    .aroma-link-btn:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(90,138,74,.45)}
+    .aroma-link-sub{font-size:.8rem;opacity:.88;font-weight:400;display:block;margin-top:.2rem}
+
+  </style>
+</head>
+<body>
+<div class="hdr">
+  <div class="hdr-ico">🔬</div>
+  <h1>體內毒素負荷評估問卷</h1>
+  <h2>Toxin Burden Self-Assessment · 100 Questions · v2.0</h2>
+  <div class="hdr-desc">
+    根據功能醫學臨床資料與瀚仕功能醫學研究中心檢測指引，評估您體內可能的毒素負荷分佈，並提供個人化的精準檢測建議。<br>
+    <small>Based on functional medicine data &amp; Redox FM Research Center testing guidelines — provides personalized toxin burden profile &amp; testing recommendations.</small>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="disc">
+    ⚠️ <strong>重要聲明：</strong>本問卷僅供初步篩查，<strong>不構成醫療診斷</strong>。請攜帶結果諮詢功能醫學或整合醫學醫師進行正式評估。<br>
+    <em>For screening only — not a medical diagnosis. Please consult a Functional/Integrative Medicine physician for formal evaluation.</em>
+  </div>
+
+  <div class="pgbox">
+    <div class="pgrow">
+      <span class="pglbl">已勾選 Questions answered</span>
+      <span class="pgnum"><span id="cc">0</span> / 100</span>
+    </div>
+    <div class="pgtrack"><div class="pgfill" id="pf"></div></div>
+  </div>
+
+  <form id="mf">
+
+    <!-- SEC 1 -->
+    <div class="sec">
+      <div class="sechd"><div class="secico" style="background:#ebf8ff">🏠</div><div class="secinfo"><h3>第一部分：暴露史與生活習慣 <span class="badge">13題</span></h3><p>Section 1 — Exposure History &amp; Lifestyle</p></div></div>
+      <label class="qi" id="L-q1"><input type="checkbox" id="q1" onchange="u(this)"><div class="qlbl"><div class="qzh">長期居住或工作在潮濕、有霉味的環境中（地下室、老舊建築、漏水牆壁）</div><div class="qen">Long-term exposure to damp, moldy environments (basements, old buildings, water-damaged walls)</div></div></label>
+      <label class="qi" id="L-q2"><input type="checkbox" id="q2" onchange="u(this)"><div class="qlbl"><div class="qzh">口中有多顆汞合金（銀色）補牙，或曾大量補牙</div><div class="qen">Multiple amalgam (silver) dental fillings or extensive dental restoration history</div></div></label>
+      <label class="qi" id="L-q3"><input type="checkbox" id="q3" onchange="u(this)"><div class="qlbl"><div class="qzh">經常食用大型掠食性魚類（鮪魚、旗魚、鯊魚，每週超過2次）</div><div class="qen">Frequent large predatory fish consumption (tuna, swordfish, shark &gt;2×/week)</div></div></label>
+      <label class="qi" id="L-q4"><input type="checkbox" id="q4" onchange="u(this)"><div class="qlbl"><div class="qzh">曾長期從事含重金屬工作環境（焊接、採礦、電子製造、電池回收）</div><div class="qen">Long-term occupational heavy metal exposure (welding, mining, electronics, battery recycling)</div></div></label>
+      <label class="qi" id="L-q5"><input type="checkbox" id="q5" onchange="u(this)"><div class="qlbl"><div class="qzh">生活或工作在農業區，長期接觸農藥或除草劑噴灑</div><div class="qen">Living/working in agricultural areas with regular pesticide or herbicide exposure</div></div></label>
+      <label class="qi" id="L-q6"><input type="checkbox" id="q6" onchange="u(this)"><div class="qlbl"><div class="qzh">大量食用非有機蔬菜水果，很少清洗或去皮</div><div class="qen">Heavy consumption of non-organic produce without thorough washing or peeling</div></div></label>
+      <label class="qi" id="L-q7"><input type="checkbox" id="q7" onchange="u(this)"><div class="qlbl"><div class="qzh">經常使用塑膠容器微波加熱食物或裝熱飲</div><div class="qen">Frequently microwaving food or hot beverages in plastic containers</div></div></label>
+      <label class="qi" id="L-q8"><input type="checkbox" id="q8" onchange="u(this)"><div class="qlbl"><div class="qzh">每天使用含香精的化妝品、香水、洗髮精或個人護理產品</div><div class="qen">Daily use of fragranced cosmetics, perfumes, shampoos, or personal care products</div></div></label>
+      <label class="qi" id="L-q9"><input type="checkbox" id="q9" onchange="u(this)"><div class="qlbl"><div class="qzh">環境中有大量塑膠製品、PVC 地板、不沾鍋或含阻燃劑材料</div><div class="qen">Environment with PVC flooring, Teflon cookware, flame retardant materials, or abundant plastics</div></div></label>
+      <label class="qi" id="L-q10"><input type="checkbox" id="q10" onchange="u(this)"><div class="qlbl"><div class="qzh">曾被蜱蟲（壁蝨）叮咬，或有萊姆病確診或疑似史</div><div class="qen">History of tick bite, or diagnosed/suspected Lyme disease</div></div></label>
+      <label class="qi" id="L-q11"><input type="checkbox" id="q11" onchange="u(this)"><div class="qlbl"><div class="qzh">曾至熱帶地區旅行（東南亞、非洲、南美），返回後出現腸胃或全身症狀</div><div class="qen">Travel to tropical regions with subsequent GI or systemic symptoms upon return</div></div></label>
+      <label class="qi" id="L-q12"><input type="checkbox" id="q12" onchange="u(this)"><div class="qlbl"><div class="qzh">家中或辦公室曾有水災、漏水後未徹底處理，或有肉眼可見的黑色/綠色黴斑</div><div class="qen">History of flooding or water damage not properly remediated, or visible mold in home/office</div></div></label>
+      <label class="qi" id="L-q13"><input type="checkbox" id="q13" onchange="u(this)"><div class="qlbl"><div class="qzh">飲食中常含高黴菌毒素風險食物（花生、玉米、穀物、咖啡豆、乾燥水果）</div><div class="qen">Diet frequently includes high-mycotoxin-risk foods (peanuts, corn, grains, coffee, dried fruits)</div></div></label>
+    </div>
+
+    <!-- SEC 2 -->
+    <div class="sec">
+      <div class="sechd"><div class="secico" style="background:#faf5ff">🧠</div><div class="secinfo"><h3>第二部分：神經認知症狀 <span class="badge">13題</span></h3><p>Section 2 — Neurological &amp; Cognitive Symptoms</p></div></div>
+      <label class="qi" id="L-q14"><input type="checkbox" id="q14" onchange="u(this)"><div class="qlbl"><div class="qzh">腦霧：思考遲緩、記憶困難、注意力無法集中</div><div class="qen">Brain fog: slow thinking, memory difficulties, poor concentration</div></div></label>
+      <label class="qi" id="L-q15"><input type="checkbox" id="q15" onchange="u(this)"><div class="qlbl"><div class="qzh">手腳顫抖（靜止時或動作時）</div><div class="qen">Hand or foot tremors (at rest or during movement)</div></div></label>
+      <label class="qi" id="L-q16"><input type="checkbox" id="q16" onchange="u(this)"><div class="qlbl"><div class="qzh">周邊神經病變：手腳麻木、刺痛、灼熱感或電擊感</div><div class="qen">Peripheral neuropathy: numbness, tingling, burning, or electric sensations in hands/feet</div></div></label>
+      <label class="qi" id="L-q17"><input type="checkbox" id="q17" onchange="u(this)"><div class="qlbl"><div class="qzh">口腔或牙齦有金屬味道</div><div class="qen">Metallic taste in mouth or on gums</div></div></label>
+      <label class="qi" id="L-q18"><input type="checkbox" id="q18" onchange="u(this)"><div class="qlbl"><div class="qzh">記憶力或認知功能緩慢下降（非急性，持續數月以上）</div><div class="qen">Slowly declining memory or cognitive function (non-acute, persisting &gt;months)</div></div></label>
+      <label class="qi" id="L-q19"><input type="checkbox" id="q19" onchange="u(this)"><div class="qlbl"><div class="qzh">有帕金森氏症個人史或直系親屬病史</div><div class="qen">Personal or first-degree family history of Parkinson's disease</div></div></label>
+      <label class="qi" id="L-q20"><input type="checkbox" id="q20" onchange="u(this)"><div class="qlbl"><div class="qzh">耳鳴（持續性或間歇性）</div><div class="qen">Tinnitus: persistent or intermittent ringing in ears</div></div></label>
+      <label class="qi" id="L-q21"><input type="checkbox" id="q21" onchange="u(this)"><div class="qlbl"><div class="qzh">情緒低落、憂鬱感持續超過1個月，無明顯外在原因</div><div class="qen">Persistent low mood or depression &gt;1 month without clear external cause</div></div></label>
+      <label class="qi" id="L-q22"><input type="checkbox" id="q22" onchange="u(this)"><div class="qlbl"><div class="qzh">焦慮症、恐慌發作或強迫症狀</div><div class="qen">Anxiety disorder, panic attacks, or OCD-like symptoms</div></div></label>
+      <label class="qi" id="L-q23"><input type="checkbox" id="q23" onchange="u(this)"><div class="qlbl"><div class="qzh">視力模糊、視野縮小或對光線特別敏感（光敏感症）</div><div class="qen">Blurred vision, visual field narrowing, or unusual light sensitivity (photophobia)</div></div></label>
+      <label class="qi" id="L-q24"><input type="checkbox" id="q24" onchange="u(this)"><div class="qlbl"><div class="qzh">頭暈、平衡感差或走路不穩（非耳石問題）</div><div class="qen">Dizziness, poor balance, or unsteady gait (not due to benign positional vertigo)</div></div></label>
+      <label class="qi" id="L-q25"><input type="checkbox" id="q25" onchange="u(this)"><div class="qlbl"><div class="qzh">面神經麻痺（貝爾氏麻痺），無明顯誘因或反覆發作</div><div class="qen">Bell's palsy (facial nerve paralysis) without clear cause or with recurrences</div></div></label>
+      <label class="qi" id="L-q26"><input type="checkbox" id="q26" onchange="u(this)"><div class="qlbl"><div class="qzh">癲癇或不明原因抽搐發作</div><div class="qen">Seizures or unexplained convulsive episodes</div></div></label>
+    </div>
+
+    <!-- SEC 3 -->
+    <div class="sec">
+      <div class="sechd"><div class="secico" style="background:#fff5f5">🛡️</div><div class="secinfo"><h3>第三部分：免疫與感染相關症狀 <span class="badge">14題</span></h3><p>Section 3 — Immune &amp; Infection-Related Symptoms</p></div></div>
+      <label class="qi" id="L-q27"><input type="checkbox" id="q27" onchange="u(this)"><div class="qlbl"><div class="qzh">反覆低燒或長期不明原因發燒（體溫≥38°C）</div><div class="qen">Recurring low-grade or unexplained fevers (≥38°C)</div></div></label>
+      <label class="qi" id="L-q28"><input type="checkbox" id="q28" onchange="u(this)"><div class="qlbl"><div class="qzh">頸部、腋下或腹股溝淋巴結腫大</div><div class="qen">Swollen lymph nodes in neck, armpits, or groin</div></div></label>
+      <label class="qi" id="L-q29"><input type="checkbox" id="q29" onchange="u(this)"><div class="qlbl"><div class="qzh">曾確診傳染性單核球增多症（EB病毒感染，俗稱接吻病）</div><div class="qen">Diagnosed with infectious mononucleosis (Epstein-Barr virus / "mono")</div></div></label>
+      <label class="qi" id="L-q30"><input type="checkbox" id="q30" onchange="u(this)"><div class="qlbl"><div class="qzh">皮膚出現過帶狀疱疹（皮蛇）</div><div class="qen">History of herpes zoster (shingles) outbreak</div></div></label>
+      <label class="qi" id="L-q31"><input type="checkbox" id="q31" onchange="u(this)"><div class="qlbl"><div class="qzh">免疫力低下，容易反覆感冒、感染或傷口不易癒合</div><div class="qen">Low immunity: frequent colds, recurrent infections, or poor wound healing</div></div></label>
+      <label class="qi" id="L-q32"><input type="checkbox" id="q32" onchange="u(this)"><div class="qlbl"><div class="qzh">新冠肺炎（COVID-19）後症狀持續超過3個月（Long COVID）</div><div class="qen">Post-COVID symptoms persisting &gt;3 months (Long COVID / PASC)</div></div></label>
+      <label class="qi" id="L-q33"><input type="checkbox" id="q33" onchange="u(this)"><div class="qlbl"><div class="qzh">喉嚨反覆疼痛、慢性咽喉炎或長期喉嚨異物感</div><div class="qen">Recurring sore throat, chronic pharyngitis, or persistent throat discomfort</div></div></label>
+      <label class="qi" id="L-q34"><input type="checkbox" id="q34" onchange="u(this)"><div class="qlbl"><div class="qzh">被診斷有慢性疲勞症候群（CFS/ME）或纖維肌痛症</div><div class="qen">Diagnosed with chronic fatigue syndrome (CFS/ME) or fibromyalgia</div></div></label>
+      <label class="qi" id="L-q35"><input type="checkbox" id="q35" onchange="u(this)"><div class="qlbl"><div class="qzh">關節疼痛，且疼痛會遊走到不同關節（非固定、非外傷）</div><div class="qen">Migratory joint pain moving to different joints (non-fixed, non-traumatic)</div></div></label>
+      <label class="qi" id="L-q36"><input type="checkbox" id="q36" onchange="u(this)"><div class="qlbl"><div class="qzh">叮咬後出現牛眼狀（靶心形）紅疹</div><div class="qen">Bull's-eye (target-shaped) rash after a bite</div></div></label>
+      <label class="qi" id="L-q37"><input type="checkbox" id="q37" onchange="u(this)"><div class="qlbl"><div class="qzh">慢性呼吸道感染（黴漿菌、披衣菌等非典型病菌）或反覆性支氣管炎</div><div class="qen">Chronic respiratory infections (mycoplasma, chlamydia, atypical pathogens) or recurrent bronchitis</div></div></label>
+      <label class="qi" id="L-q38"><input type="checkbox" id="q38" onchange="u(this)"><div class="qlbl"><div class="qzh">自體免疫疾病（橋本氏甲狀腺炎、類風濕關節炎、紅斑性狼瘡等）</div><div class="qen">Autoimmune diseases (Hashimoto's, rheumatoid arthritis, lupus, etc.)</div></div></label>
+      <label class="qi" id="L-q39"><input type="checkbox" id="q39" onchange="u(this)"><div class="qlbl"><div class="qzh">反覆口腔潰瘍（每個月發作，或每次超過7天未癒）</div><div class="qen">Recurrent mouth ulcers (monthly occurrences or lasting &gt;7 days each)</div></div></label>
+      <label class="qi" id="L-q40"><input type="checkbox" id="q40" onchange="u(this)"><div class="qlbl"><div class="qzh">夜間盜汗（非更年期因素），伴隨不明原因疲勞</div><div class="qen">Night sweats (non-menopausal) accompanied by unexplained fatigue</div></div></label>
+    </div>
+
+    <!-- SEC 4 -->
+    <div class="sec">
+      <div class="sechd"><div class="secico" style="background:#f0fff4">🫁</div><div class="secinfo"><h3>第四部分：消化與腸道症狀 <span class="badge">11題</span></h3><p>Section 4 — Digestive &amp; Gut Symptoms</p></div></div>
+      <label class="qi" id="L-q41"><input type="checkbox" id="q41" onchange="u(this)"><div class="qlbl"><div class="qzh">反覆腹痛、腹脹、腹瀉或便秘（腸躁症候群模式）</div><div class="qen">Recurring abdominal pain, bloating, diarrhea, or constipation (IBS pattern)</div></div></label>
+      <label class="qi" id="L-q42"><input type="checkbox" id="q42" onchange="u(this)"><div class="qlbl"><div class="qzh">肛門或會陰部搔癢（尤其夜間加重）</div><div class="qen">Anal or perineal itching, especially worse at night</div></div></label>
+      <label class="qi" id="L-q43"><input type="checkbox" id="q43" onchange="u(this)"><div class="qlbl"><div class="qzh">不明原因體重減輕（非刻意節食）</div><div class="qen">Unexplained weight loss (not intentional dieting)</div></div></label>
+      <label class="qi" id="L-q44"><input type="checkbox" id="q44" onchange="u(this)"><div class="qlbl"><div class="qzh">夜間磨牙（bruxism），或睡眠中出現不自主咬牙</div><div class="qen">Teeth grinding at night (bruxism) or involuntary jaw clenching during sleep</div></div></label>
+      <label class="qi" id="L-q45"><input type="checkbox" id="q45" onchange="u(this)"><div class="qlbl"><div class="qzh">多重食物過敏或新近出現的食物不耐受（麩質、乳製品等）</div><div class="qen">Multiple food allergies or newly developed food intolerances (gluten, dairy, etc.)</div></div></label>
+      <label class="qi" id="L-q46"><input type="checkbox" id="q46" onchange="u(this)"><div class="qlbl"><div class="qzh">蕁麻疹反覆發作或慢性蕁麻疹（無明顯誘因）</div><div class="qen">Recurring or chronic hives without clear triggers</div></div></label>
+      <label class="qi" id="L-q47"><input type="checkbox" id="q47" onchange="u(this)"><div class="qlbl"><div class="qzh">不明原因貧血（已排除月經因素或飲食不足）</div><div class="qen">Unexplained anemia (excluding menstrual or dietary causes)</div></div></label>
+      <label class="qi" id="L-q48"><input type="checkbox" id="q48" onchange="u(this)"><div class="qlbl"><div class="qzh">肝功能指數異常（ALT/AST/GGT 偏高，非飲酒因素）</div><div class="qen">Abnormal liver function (elevated ALT/AST/GGT, non-alcohol-related)</div></div></label>
+      <label class="qi" id="L-q49"><input type="checkbox" id="q49" onchange="u(this)"><div class="qlbl"><div class="qzh">吃到發酵食品、酒精、起司後出現心悸或全身發紅（組織胺不耐受）</div><div class="qen">Palpitations or flushing after fermented foods, alcohol, or cheese (histamine intolerance)</div></div></label>
+      <label class="qi" id="L-q50"><input type="checkbox" id="q50" onchange="u(this)"><div class="qlbl"><div class="qzh">右上腹隱隱作痛或壓痛感（非膽結石確診）</div><div class="qen">Dull pain or tenderness in right upper abdomen (not confirmed gallstones)</div></div></label>
+      <label class="qi" id="L-q51"><input type="checkbox" id="q51" onchange="u(this)"><div class="qlbl"><div class="qzh">習慣吃生食、生魚片、生肉或未煮熟食物</div><div class="qen">Regular consumption of raw/undercooked foods (sashimi, raw meat, rare steak)</div></div></label>
+    </div>
+
+    <!-- SEC 5 -->
+    <div class="sec">
+      <div class="sechd"><div class="secico" style="background:#fffaf0">⚗️</div><div class="secinfo"><h3>第五部分：荷爾蒙與代謝症狀 <span class="badge">14題</span></h3><p>Section 5 — Hormonal &amp; Metabolic Symptoms</p></div></div>
+      <label class="qi" id="L-q52"><input type="checkbox" id="q52" onchange="u(this)"><div class="qlbl"><div class="qzh">月經不規律、嚴重痛經或子宮內膜異位症診斷</div><div class="qen">Irregular menstruation, severe dysmenorrhea, or diagnosed endometriosis</div></div></label>
+      <label class="qi" id="L-q53"><input type="checkbox" id="q53" onchange="u(this)"><div class="qlbl"><div class="qzh">多囊卵巢症候群（PCOS）診斷</div><div class="qen">Polycystic ovary syndrome (PCOS) diagnosis</div></div></label>
+      <label class="qi" id="L-q54"><input type="checkbox" id="q54" onchange="u(this)"><div class="qlbl"><div class="qzh">子宮肌瘤或乳房纖維囊腫診斷</div><div class="qen">Uterine fibroids or fibrocystic breast disease diagnosis</div></div></label>
+      <label class="qi" id="L-q55"><input type="checkbox" id="q55" onchange="u(this)"><div class="qlbl"><div class="qzh">男性出現女性化乳房（男性女乳症）或性功能障礙</div><div class="qen">Gynecomastia (male breast enlargement) or sexual dysfunction in males</div></div></label>
+      <label class="qi" id="L-q56"><input type="checkbox" id="q56" onchange="u(this)"><div class="qlbl"><div class="qzh">甲狀腺功能異常（亢進、低下或橋本氏甲狀腺炎）</div><div class="qen">Thyroid dysfunction (hyper/hypothyroidism or Hashimoto's thyroiditis)</div></div></label>
+      <label class="qi" id="L-q57"><input type="checkbox" id="q57" onchange="u(this)"><div class="qlbl"><div class="qzh">代謝症候群：腹部肥胖、高血糖、高血脂（三高中任意兩項）</div><div class="qen">Metabolic syndrome: central obesity, high blood sugar, or high lipids (2+ components)</div></div></label>
+      <label class="qi" id="L-q58"><input type="checkbox" id="q58" onchange="u(this)"><div class="qlbl"><div class="qzh">不孕症、反覆流產或精子品質異常</div><div class="qen">Infertility, recurrent miscarriage, or abnormal sperm parameters</div></div></label>
+      <label class="qi" id="L-q59"><input type="checkbox" id="q59" onchange="u(this)"><div class="qlbl"><div class="qzh">早發性高血壓（40歲前出現，無強烈家族因素）</div><div class="qen">Early-onset hypertension (before age 40, no strong family history)</div></div></label>
+      <label class="qi" id="L-q60"><input type="checkbox" id="q60" onchange="u(this)"><div class="qlbl"><div class="qzh">明顯掉髮、指甲出現白色橫紋（米氏線）或指甲變形</div><div class="qen">Significant hair loss, Mees' lines (white horizontal nail bands), or nail deformity</div></div></label>
+      <label class="qi" id="L-q61"><input type="checkbox" id="q61" onchange="u(this)"><div class="qlbl"><div class="qzh">腎功能異常（肌酸酐上升、蛋白尿或 GFR 下降）</div><div class="qen">Abnormal kidney function (elevated creatinine, proteinuria, or reduced GFR)</div></div></label>
+      <label class="qi" id="L-q62"><input type="checkbox" id="q62" onchange="u(this)"><div class="qlbl"><div class="qzh">骨質疏鬆或骨密度偏低（年齡無法解釋）</div><div class="qen">Osteoporosis or low bone density unexplained by age alone</div></div></label>
+      <label class="qi" id="L-q63"><input type="checkbox" id="q63" onchange="u(this)"><div class="qlbl"><div class="qzh">兒童性早熟（女童8歲前或男童9歲前出現第二性徵）</div><div class="qen">Precocious puberty (girls &lt;8 yrs or boys &lt;9 yrs with secondary sex characteristics)</div></div></label>
+      <label class="qi" id="L-q64"><input type="checkbox" id="q64" onchange="u(this)"><div class="qlbl"><div class="qzh">皮膚色素沉著過深、白斑或手掌/腳底角化過度</div><div class="qen">Hyperpigmentation, depigmentation, or palmar/plantar hyperkeratosis</div></div></label>
+      <label class="qi" id="L-q65"><input type="checkbox" id="q65" onchange="u(this)"><div class="qlbl"><div class="qzh">女性月經提早初潮（性早熟），或男性出現青春期女性化特徵</div><div class="qen">Early menarche in females, or feminization signs in males during puberty</div></div></label>
+    </div>
+
+    <!-- SEC 6 -->
+    <div class="sec">
+      <div class="sechd"><div class="secico" style="background:#fff5f5">❤️</div><div class="secinfo"><h3>第六部分：心血管與肌肉骨骼症狀 <span class="badge">9題</span></h3><p>Section 6 — Cardiovascular &amp; Musculoskeletal Symptoms</p></div></div>
+      <label class="qi" id="L-q66"><input type="checkbox" id="q66" onchange="u(this)"><div class="qlbl"><div class="qzh">無明顯原因的心悸或心律不整（已排除心臟結構問題）</div><div class="qen">Palpitations or irregular heartbeat without apparent cause (cardiac structure normal)</div></div></label>
+      <label class="qi" id="L-q67"><input type="checkbox" id="q67" onchange="u(this)"><div class="qlbl"><div class="qzh">心跳異常緩慢（靜息心率 &lt;50 bpm）或心臟傳導阻滯</div><div class="qen">Abnormally slow resting heart rate (&lt;50 bpm) or heart conduction block</div></div></label>
+      <label class="qi" id="L-q68"><input type="checkbox" id="q68" onchange="u(this)"><div class="qlbl"><div class="qzh">直立性低血壓（POTS）：由坐/臥站起時頭暈、心跳加快</div><div class="qen">POTS: dizziness and rapid heartbeat when standing up from sitting/lying</div></div></label>
+      <label class="qi" id="L-q69"><input type="checkbox" id="q69" onchange="u(this)"><div class="qlbl"><div class="qzh">肌肉酸痛、無力或肌肉抽搐（與運動量明顯不相符）</div><div class="qen">Muscle aches, weakness, or spasms disproportionate to physical activity</div></div></label>
+      <label class="qi" id="L-q70"><input type="checkbox" id="q70" onchange="u(this)"><div class="qlbl"><div class="qzh">全身廣泛性慢性疼痛（壓痛點超過11個，符合纖維肌痛症標準）</div><div class="qen">Widespread body pain with &gt;11 tender points (meeting fibromyalgia criteria)</div></div></label>
+      <label class="qi" id="L-q71"><input type="checkbox" id="q71" onchange="u(this)"><div class="qlbl"><div class="qzh">容易瘀傷或皮膚出現蜘蛛狀微血管擴張</div><div class="qen">Easy bruising or spider angiomas (dilated spider-like blood vessels) on skin</div></div></label>
+      <label class="qi" id="L-q72"><input type="checkbox" id="q72" onchange="u(this)"><div class="qlbl"><div class="qzh">手術後或外傷後恢復速度明顯偏慢，傷口容易感染</div><div class="qen">Abnormally slow recovery after surgery or trauma, with frequent wound infections</div></div></label>
+      <label class="qi" id="L-q73"><input type="checkbox" id="q73" onchange="u(this)"><div class="qlbl"><div class="qzh">關節腫脹但無外傷史（尤其是雙側對稱的關節腫脹）</div><div class="qen">Joint swelling without trauma history (especially bilateral symmetric joint swelling)</div></div></label>
+      <label class="qi" id="L-q74"><input type="checkbox" id="q74" onchange="u(this)"><div class="qlbl"><div class="qzh">肌力下降或肌肉萎縮（與年齡不符，非廢用性萎縮）</div><div class="qen">Muscle weakness or atrophy disproportionate to age (not due to disuse)</div></div></label>
+    </div>
+
+    <!-- SEC 7 -->
+    <div class="sec">
+      <div class="sechd"><div class="secico" style="background:#fffbeb">🌡️</div><div class="secinfo"><h3>第七部分：皮膚感官與全身症狀 <span class="badge">10題</span></h3><p>Section 7 — Skin, Sensory &amp; Systemic Symptoms</p></div></div>
+      <label class="qi" id="L-q75"><input type="checkbox" id="q75" onchange="u(this)"><div class="qlbl"><div class="qzh">即使充分睡眠仍感到極度疲勞（醒來仍覺未休息）</div><div class="qen">Extreme fatigue even after adequate sleep (waking unrefreshed)</div></div></label>
+      <label class="qi" id="L-q76"><input type="checkbox" id="q76" onchange="u(this)"><div class="qlbl"><div class="qzh">對多種氣味或化學物質敏感，輕微暴露即出現頭痛/噁心（多重化學物質敏感症）</div><div class="qen">Extreme sensitivity to smells/chemicals causing headache/nausea (Multiple Chemical Sensitivity)</div></div></label>
+      <label class="qi" id="L-q77"><input type="checkbox" id="q77" onchange="u(this)"><div class="qlbl"><div class="qzh">慢性鼻竇炎或長期鼻塞（超過3個月，非季節性過敏）</div><div class="qen">Chronic sinusitis or persistent nasal congestion (&gt;3 months, non-seasonal)</div></div></label>
+      <label class="qi" id="L-q78"><input type="checkbox" id="q78" onchange="u(this)"><div class="qlbl"><div class="qzh">嚴重睡眠障礙（入睡困難、多夢或睡眠呼吸中止）</div><div class="qen">Severe sleep disorders (difficulty falling asleep, excessive dreaming, or sleep apnea)</div></div></label>
+      <label class="qi" id="L-q79"><input type="checkbox" id="q79" onchange="u(this)"><div class="qlbl"><div class="qzh">慢性頭痛或偏頭痛（每月超過4次，且止痛藥效果不佳）</div><div class="qen">Chronic headaches or migraines (&gt;4 times/month, poorly responsive to analgesics)</div></div></label>
+      <label class="qi" id="L-q80"><input type="checkbox" id="q80" onchange="u(this)"><div class="qlbl"><div class="qzh">皮膚出現不明原因皮疹、搔癢、慢性濕疹或異位性皮膚炎</div><div class="qen">Unexplained rashes, itching, chronic eczema, or atopic dermatitis</div></div></label>
+      <label class="qi" id="L-q81"><input type="checkbox" id="q81" onchange="u(this)"><div class="qlbl"><div class="qzh">頻尿或夜尿增加（非泌尿道感染，且無糖尿病診斷）</div><div class="qen">Frequent urination or increased nocturia (not UTI or diabetes)</div></div></label>
+      <label class="qi" id="L-q82"><input type="checkbox" id="q82" onchange="u(this)"><div class="qlbl"><div class="qzh">皮膚有爬行感、刺痛感或「蟲在皮下爬」的異常感覺</div><div class="qen">Crawling sensations, tingling, or "bugs under skin" feelings (formication)</div></div></label>
+      <label class="qi" id="L-q83"><input type="checkbox" id="q83" onchange="u(this)"><div class="qlbl"><div class="qzh">接觸農藥後出現流涎、流淚、瞳孔縮小或大量出汗</div><div class="qen">Salivation, lacrimation, miosis, or diaphoresis after pesticide exposure (cholinergic signs)</div></div></label>
+      <label class="qi" id="L-q84"><input type="checkbox" id="q84" onchange="u(this)"><div class="qlbl"><div class="qzh">口腔或鼻腔內出現不規則潰瘍（非一般復發性口瘡）</div><div class="qen">Irregular oral or nasal ulcers (not typical aphthous ulcers)</div></div></label>
+    </div>
+
+    <!-- SEC 8 -->
+    <div class="sec">
+      <div class="sechd"><div class="secico" style="background:#f9f0ff">🪱</div><div class="secinfo"><h3>第八部分：寄生蟲特異性症狀 <span class="badge">8題</span></h3><p>Section 8 — Parasite-Specific Symptoms</p></div></div>
+      <label class="qi" id="L-q85"><input type="checkbox" id="q85" onchange="u(this)"><div class="qlbl"><div class="qzh">家中有寵物（貓、狗），且接觸密切（共寢、接觸糞便未洗手）</div><div class="qen">Pet ownership (cats/dogs) with close contact (sharing bed, handling feces without handwashing)</div></div></label>
+      <label class="qi" id="L-q86"><input type="checkbox" id="q86" onchange="u(this)"><div class="qlbl"><div class="qzh">嗜酸性球偏高（抽血報告顯示 Eosinophil % 偏高）</div><div class="qen">Elevated eosinophil percentage on blood test</div></div></label>
+      <label class="qi" id="L-q87"><input type="checkbox" id="q87" onchange="u(this)"><div class="qlbl"><div class="qzh">右上腹間歇性疼痛，與飲食無明顯相關（肝吸蟲或蛔蟲可能）</div><div class="qen">Intermittent right upper abdominal pain unrelated to eating (possible liver fluke or roundworm)</div></div></label>
+      <label class="qi" id="L-q88"><input type="checkbox" id="q88" onchange="u(this)"><div class="qlbl"><div class="qzh">糞便中偶爾出現白色小蟲或蟲卵樣物體</div><div class="qen">Occasional white worms or worm-like objects visible in stool</div></div></label>
+      <label class="qi" id="L-q89"><input type="checkbox" id="q89" onchange="u(this)"><div class="qlbl"><div class="qzh">食慾旺盛但體重持續下降，或反之食慾極差</div><div class="qen">Voracious appetite with ongoing weight loss, or severely reduced appetite</div></div></label>
+      <label class="qi" id="L-q90"><input type="checkbox" id="q90" onchange="u(this)"><div class="qlbl"><div class="qzh">曾於東南亞或非洲居住，且患過瘧疾、阿米巴痢疾等原蟲類疾病</div><div class="qen">History of living in SE Asia or Africa with protozoal disease (malaria, amoebiasis, etc.)</div></div></label>
+      <label class="qi" id="L-q91"><input type="checkbox" id="q91" onchange="u(this)"><div class="qlbl"><div class="qzh">不明原因視力下降或眼前出現浮動物（眼部寄生蟲可能）</div><div class="qen">Unexplained visual decline or new floaters (possible ocular parasites)</div></div></label>
+      <label class="qi" id="L-q92"><input type="checkbox" id="q92" onchange="u(this)"><div class="qlbl"><div class="qzh">曾確診弓漿蟲感染（Toxoplasmosis），或孕期有感染史</div><div class="qen">Confirmed toxoplasmosis diagnosis, or history of infection during pregnancy</div></div></label>
+    </div>
+
+    <!-- SEC 9 -->
+    <div class="sec">
+      <div class="sechd"><div class="secico" style="background:#fff5f5">🔩</div><div class="secinfo"><h3>第九部分：重金屬特異性症狀 <span class="badge">8題</span></h3><p>Section 9 — Heavy Metal-Specific Symptoms</p></div></div>
+      <label class="qi" id="L-q93"><input type="checkbox" id="q93" onchange="u(this)"><div class="qlbl"><div class="qzh">色覺異常（辨色困難）或視野縮小（非老花）</div><div class="qen">Color vision abnormality or visual field narrowing (not presbyopia)</div></div></label>
+      <label class="qi" id="L-q94"><input type="checkbox" id="q94" onchange="u(this)"><div class="qlbl"><div class="qzh">慢性咳嗽或呼吸困難（非吸菸，無哮喘診斷）</div><div class="qen">Chronic cough or breathing difficulties (non-smoker, no asthma diagnosis)</div></div></label>
+      <label class="qi" id="L-q95"><input type="checkbox" id="q95" onchange="u(this)"><div class="qlbl"><div class="qzh">痛風或尿酸偏高（非家族遺傳，且飲食無法解釋）</div><div class="qen">Gout or elevated uric acid (not hereditary, unexplained by diet alone)</div></div></label>
+      <label class="qi" id="L-q96"><input type="checkbox" id="q96" onchange="u(this)"><div class="qlbl"><div class="qzh">兒童期成長遲緩，或青少年期有 ADHD 診斷</div><div class="qen">Growth retardation in childhood, or ADHD diagnosis in adolescence</div></div></label>
+      <label class="qi" id="L-q97"><input type="checkbox" id="q97" onchange="u(this)"><div class="qlbl"><div class="qzh">牙齦有藍黑色色素沉著線（鉛線 Burton's line）</div><div class="qen">Blue-black pigmentation line on gums (Burton's line — lead toxicity sign)</div></div></label>
+      <label class="qi" id="L-q98"><input type="checkbox" id="q98" onchange="u(this)"><div class="qlbl"><div class="qzh">頭髮礦物質分析曾顯示重金屬偏高</div><div class="qen">Previous hair mineral analysis showing elevated heavy metals</div></div></label>
+      <label class="qi" id="L-q99"><input type="checkbox" id="q99" onchange="u(this)"><div class="qlbl"><div class="qzh">使用螯合療法後症狀有改善（曾接受 DMSA/DMPS 螯合治療）</div><div class="qen">Symptom improvement after chelation therapy (DMSA/DMPS treatment)</div></div></label>
+      <label class="qi" id="L-q100"><input type="checkbox" id="q100" onchange="u(this)"><div class="qlbl"><div class="qzh">心率不規則且不明原因心悸強烈，已排除甲狀腺及心臟結構問題</div><div class="qen">Irregular/strong palpitations with thyroid and cardiac structure excluded as causes</div></div></label>
+    </div>
+
+    <div class="subwrap">
+      <button type="button" class="subbtn" onclick="calc()">🔍 查看評估結果 &nbsp;|&nbsp; View My Results</button>
+      <div class="subnote">請盡量勾選所有符合您的症狀，結果更精準 · Check all applicable symptoms for best accuracy</div>
+    </div>
+  </form>
+
+  <!-- RESULTS -->
+  <div id="res">
+    <div class="rbanner">
+      <h2>📊 您的毒素負荷評估報告</h2>
+      <p>Your Personalized Toxin Burden Assessment Report</p>
+      <div class="chips">
+        <div class="chip">✅ 已勾選 <span id="fc">0</span> 題</div>
+        <div class="chip">🎯 加權總分 <span id="ts">0</span> 分</div>
+      </div>
+    </div>
+    <div id="es" style="display:none;text-align:center;padding:40px;color:#a0aec0"><p>😕 尚未勾選任何題目，請返回填寫。</p></div>
+    <div id="cs" class="chartbox">
+      <div class="ctitle">體內毒素分佈比例估算</div>
+      <div class="csub">Estimated Toxin Burden Distribution · 加權症狀模式分析 · 含瀚仕功能醫學研究中心檢測對照</div>
+      <div class="clay">
+        <div class="ccw"><canvas id="pc" width="250" height="250"></canvas></div>
+        <div class="cleg" id="cl"></div>
+      </div>
+    </div>
+    <div class="catgrid" id="cg"></div>
+    <div class="recbox" id="rb">
+      <h3>🧪 建議檢測項目（瀚仕功能醫學研究中心）<br><small style="font-weight:400;font-size:.82rem">Recommended Tests — Redox FM Research Center</small></h3>
+      <div id="rl"></div>
+    </div>
+
+    <!-- ── Crosslink to Aromatherapy Finder ── -->
+    <div class="aroma-link-wrap" id="aroma-link-wrap" style="display:none">
+      <a id="aroma-link-btn" href="#" target="_blank" class="aroma-link-btn">
+        🌿 查看適合的自然療法建議
+        <span class="aroma-link-sub">精油・草藥・營養素・順勢製劑・療癒肯定句 →</span>
+      </a>
+    </div>
+    <div class="fin">
+      <h4>🩺 重要提醒 | Important Reminder</h4>
+      <p>
+        本評估僅為初步篩查，<strong>無法確診任何疾病</strong>。建議攜帶結果諮詢<strong>功能醫學醫師</strong>。<br>
+        <strong>瀚仕功能醫學研究中心</strong>：Tel 02-8501-1298 ·
+        <a href="https://www.redoxfm.com" target="_blank">www.redoxfm.com</a><br>
+        地址：104 台北市中山區敬業一路 2 號 17 樓<br><br>
+        <em>This result is for preliminary screening only. Please consult a Functional Medicine physician for a comprehensive evaluation and personalized detoxification plan.</em>
+      </p>
+    </div>
+    <div class="rstwrap">
+      <button class="rstbtn" onclick="rst()">↩ 重新填寫 &nbsp;|&nbsp; Restart</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const TQ=100;
+const Q={
+  q1:{mold:5,bacteria:1},q2:{heavymetal:5},q3:{heavymetal:4},
+  q4:{heavymetal:5,pesticide:2},q5:{pesticide:5,endocrine:2},
+  q6:{pesticide:3,endocrine:1},q7:{endocrine:4,pesticide:1},
+  q8:{endocrine:3},q9:{endocrine:4},q10:{bacteria:5},
+  q11:{parasite:4,bacteria:2},q12:{mold:5},q13:{mold:4,pesticide:1},
+  q14:{mold:3,virus:2,bacteria:2,heavymetal:2},
+  q15:{heavymetal:4,mold:1},q16:{heavymetal:3,bacteria:2,pesticide:2},
+  q17:{heavymetal:4},q18:{heavymetal:3,pesticide:2,mold:2},
+  q19:{pesticide:3,heavymetal:2},q20:{mold:2,heavymetal:2,bacteria:1},
+  q21:{virus:2,mold:2,heavymetal:2,pesticide:1},
+  q22:{mold:2,heavymetal:2,pesticide:1},
+  q23:{mold:2,virus:2,heavymetal:2},q24:{mold:2,virus:1,heavymetal:2,bacteria:1},
+  q25:{bacteria:4,mold:1},q26:{pesticide:3,heavymetal:2},
+  q27:{virus:3,bacteria:2,parasite:1},q28:{virus:4,bacteria:2},
+  q29:{virus:5},q30:{virus:5},
+  q31:{virus:3,mold:2,parasite:1},q32:{virus:4,mold:1},
+  q33:{virus:3,mold:2,bacteria:2},q34:{virus:3,mold:3,bacteria:2},
+  q35:{bacteria:4,virus:2},q36:{bacteria:5},
+  q37:{bacteria:4,mold:2},q38:{heavymetal:3,virus:2,mold:2},
+  q39:{virus:3,mold:1},q40:{bacteria:3,virus:2},
+  q41:{parasite:3,bacteria:3,mold:1},q42:{parasite:4},
+  q43:{parasite:3,virus:2,bacteria:1},q44:{parasite:3},
+  q45:{parasite:2,mold:3,bacteria:1},q46:{parasite:3,mold:2},
+  q47:{parasite:3,heavymetal:1,virus:1},
+  q48:{pesticide:2,mold:2,heavymetal:2,parasite:1},
+  q49:{mold:3},q50:{parasite:3,bacteria:1},q51:{parasite:4},
+  q52:{endocrine:4,mold:2},q53:{endocrine:4,mold:1},
+  q54:{endocrine:4,mold:2},q55:{endocrine:4,mold:2},
+  q56:{endocrine:3,heavymetal:2,mold:1},
+  q57:{endocrine:3,pesticide:2,heavymetal:1},
+  q58:{endocrine:4,heavymetal:2,mold:1},
+  q59:{heavymetal:3,endocrine:2},q60:{heavymetal:3,endocrine:2},
+  q61:{heavymetal:3,mold:2},q62:{heavymetal:3,endocrine:2},
+  q63:{endocrine:5},q64:{heavymetal:4,pesticide:1},
+  q65:{endocrine:4,mold:2},
+  q66:{mold:3,virus:2,bacteria:1},q67:{bacteria:3,mold:1},
+  q68:{mold:3,virus:2},q69:{bacteria:2,mold:3,virus:2,heavymetal:1},
+  q70:{mold:2,bacteria:2,virus:2,heavymetal:1},
+  q71:{mold:3,heavymetal:1},q72:{heavymetal:2,mold:1,virus:1},
+  q73:{mold:3,bacteria:1},q74:{pesticide:3,heavymetal:2},
+  q75:{mold:3,virus:3,bacteria:2,parasite:2},
+  q76:{mold:4,pesticide:2},q77:{mold:4,bacteria:2},
+  q78:{mold:2,virus:2,bacteria:1,endocrine:1},
+  q79:{bacteria:2,mold:2,heavymetal:1,pesticide:1},
+  q80:{mold:2,virus:2,parasite:2,endocrine:1},
+  q81:{mold:3,heavymetal:1},q82:{parasite:4,mold:1},
+  q83:{pesticide:5},q84:{mold:3,bacteria:1},
+  q85:{parasite:3},q86:{parasite:4,virus:1},
+  q87:{parasite:4},q88:{parasite:5},q89:{parasite:3},
+  q90:{parasite:5},q91:{parasite:3},q92:{parasite:5},
+  q93:{heavymetal:3,pesticide:1},q94:{heavymetal:3,pesticide:2},
+  q95:{heavymetal:3},q96:{heavymetal:4,pesticide:2},
+  q97:{heavymetal:5},q98:{heavymetal:4},q99:{heavymetal:5},
+  q100:{heavymetal:3,mold:1}
+};
+const C={
+  mold:      {zh:'黴菌毒素',en:'Mycotoxins',         ico:'🍄',col:'#E67E22'},
+  virus:     {zh:'病毒',    en:'Viruses',             ico:'🦠',col:'#3498DB'},
+  bacteria:  {zh:'細菌',   en:'Bacteria/Lyme',       ico:'🧫',col:'#27AE60'},
+  parasite:  {zh:'寄生蟲', en:'Parasites',            ico:'🪱',col:'#8E44AD'},
+  heavymetal:{zh:'重金屬', en:'Heavy Metals',         ico:'🔩',col:'#C0392B'},
+  pesticide: {zh:'農藥',   en:'Pesticides',           ico:'🌿',col:'#D4AC0D'},
+  endocrine: {zh:'環境荷爾蒙',en:'Endocrine Disruptors',ico:'🧬',col:'#E91E8C'}
+};
+const R={
+  mold:{t:'🍄 黴菌毒素 Mycotoxins',ts:['MycoTOX-META™（1357）尿液黴菌毒素 — 可測11種（黃麴/赭麴/單端孢等）','Bio-META® OAT（1073）全套代謝評估尿液有機酸55種','Dysbiosis-META™（1075）腸道菌相失衡分析（尿液）','視覺對比敏感度測試 VCS Test（免費線上）','TGF-β1、C4a、MSH 血清指標（CIRS 相關）'],a:'建議居家黴菌環境檢測與移除，諮詢醫師討論4D排黴療法（排毒、殺菌、補充、修復）。'},
+  virus:{t:'🦠 病毒 Viruses',ts:['EB病毒（EBV）完整抗體：VCA-IgG/IgM、EA-IgG、EBNA-IgG','巨細胞病毒（CMV）IgG/IgM；HHV-6/7 抗體','Neuroinflammation-META™（1276）神經發炎代謝評估','免疫功能評估：NK細胞活性、淋巴球亞群分析','Chronic IgG4-88（1401）慢性食物敏感分析'],a:'避免過度疲勞。諮詢醫師評估抗病毒方案（低劑量納曲酮、靜脈維生素C、免疫調節）。'},
+  bacteria:{t:'🧫 細菌 / 萊姆 Bacteria / Lyme',ts:['萊姆病血清學：ELISA初篩 + Western Blot確認','黴漿菌（Mycoplasma）IgG/IgM；披衣菌（Chlamydia）抗體','H. Pylori Antigen（1012）胃幽門桿菌糞便抗原','Gut-Map™（0886）腸道菌相分析（含病原菌鑑別）','hsCRP、ESR、IL-6 全身發炎標記'],a:'萊姆病及共感染需諮詢感染科或整合醫學醫師，制定個人化長期抗菌方案。'},
+  parasite:{t:'🪱 寄生蟲 Parasites',ts:['糞便寄生蟲鏡檢（三次不同日期，提高陽性率）','Gut-Map™（0886）腸道菌相分析（含寄生蟲/原蟲）','Eosinophil % 全血嗜酸性球計數','血清特異性寄生蟲抗體（弓漿蟲、蛔蟲、肝吸蟲等）','血清 IgE 總量（Acute IgE-40，1402）'],a:'旅行後及時篩檢，配合醫師處方寄生蟲清潔療法，並修復腸道黏膜屏障。'},
+  heavymetal:{t:'⚗️ 重金屬 Heavy Metals',ts:['Toxic Element Provocation（0999）尿液螯合前後分析（最準確）','Toxic Element Analysis（1121）血液毒性元素分析','Pb/Hg/As/Cd/Al/Ni（0997）尿液暴露分析（6種）','Nutrient & Toxic Element（1119）血液營養與毒性元素','毛髮礦物質分析（Hair Mineral Analysis）'],a:'汞合金建議在SMART協議下安全移除。螯合排毒務必在醫師監督下進行，防止再分佈。'},
+  pesticide:{t:'🌿 農藥 / 除草劑 Pesticides',ts:['HerbiTOX™（1356）尿液農藥除草劑分析（草甘膦/草銨膦/AMPA）','血清有機氯/有機磷農藥殘留檢測','紅血球膽鹼酯酶活性（ChE）','Oxy-META™（1131）氧化壓力分析','Detox Genomics™（0854）肝臟解毒基因分析'],a:'建議改用有機食材，加強膳食纖維攝取，支持肝臟第一/二相解毒。'},
+  endocrine:{t:'🧬 環境荷爾蒙 Endocrine Disruptors',ts:['Xestro-TOX™（1055）尿液環境荷爾蒙分析（塑化劑/防腐劑/酚類）','停經前荷爾蒙評估（1068）或男性荷爾蒙評估（1067）','Thyroid Hormone Analysis（0829）甲狀腺完整評估','Estro Genomics™（1134）雌激素代謝基因分析','DUTCH Test 完整荷爾蒙代謝評估（乾尿片）'],a:'改用玻璃/不鏽鋼容器、選無香精天然護膚品、攝取十字花科蔬菜促進荷爾蒙代謝。'}
+};
+
+let pie=null;
+
+function u(cb){
+  const l=document.getElementById('L-'+cb.id);
+  cb.checked?l.classList.add('ck'):l.classList.remove('ck');
+  const n=document.querySelectorAll('input[type=checkbox]:checked').length;
+  document.getElementById('cc').textContent=n;
+  document.getElementById('pf').style.width=(n/TQ*100)+'%';
+}
+
+function calc(){
+  const sc={mold:0,virus:0,bacteria:0,parasite:0,heavymetal:0,pesticide:0,endocrine:0};
+  let tc=0;
+  Object.entries(Q).forEach(([id,w])=>{
+    const el=document.getElementById(id);
+    if(el&&el.checked){tc++;Object.entries(w).forEach(([c,v])=>{sc[c]+=v});}
+  });
+  const tot=Object.values(sc).reduce((a,b)=>a+b,0);
+  document.getElementById('fc').textContent=tc;
+  document.getElementById('ts').textContent=tot;
+  const res=document.getElementById('res');
+  res.style.display='block';
+  if(tot===0){
+    document.getElementById('es').style.display='block';
+    document.getElementById('cs').style.display='none';
+    document.getElementById('cg').style.display='none';
+    document.getElementById('rb').style.display='none';
+    res.scrollIntoView({behavior:'smooth'});return;
+  }
+  document.getElementById('es').style.display='none';
+  document.getElementById('cs').style.display='block';
+  document.getElementById('cg').style.display='grid';
+  document.getElementById('rb').style.display='block';
+  const mx={mold:0,virus:0,bacteria:0,parasite:0,heavymetal:0,pesticide:0,endocrine:0};
+  Object.values(Q).forEach(w=>Object.entries(w).forEach(([c,v])=>{mx[c]+=v;}));
+  const sorted=Object.entries(sc).sort((a,b)=>b[1]-a[1]);
+  const nz=sorted.filter(([,v])=>v>0);
+  if(pie){pie.destroy();pie=null;}
+  const ctx=document.getElementById('pc').getContext('2d');
+  pie=new Chart(ctx,{
+    type:'doughnut',
+    data:{labels:nz.map(([k])=>C[k].zh),datasets:[{data:nz.map(([,v])=>v),backgroundColor:nz.map(([k])=>C[k].col),borderColor:'#fff',borderWidth:3,hoverOffset:10}]},
+    options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+ctx.label+': '+((ctx.parsed/tot)*100).toFixed(1)+'%'}}},cutout:'55%'}
+  });
+  document.getElementById('cl').innerHTML=nz.map(([k,v])=>`<div class="legitem"><div class="legdot" style="background:${C[k].col}"></div><div class="legname">${C[k].ico} ${C[k].zh}</div><div class="legpct" style="color:${C[k].col}">${((v/tot)*100).toFixed(1)}%</div></div>`).join('');
+  document.getElementById('cg').innerHTML=sorted.map(([k,v])=>{
+    const pct=tot>0?((v/tot)*100).toFixed(1):0;
+    const rp=mx[k]>0?(v/mx[k]*100):0;
+    const[rc,rl]=rp>=50?['rh','⚠️ 高度關聯']:rp>=20?['rm','⚡ 中度關聯']:rp>0?['rl','✅ 低度關聯']:['rn','— 無症狀'];
+    return`<div class="catcard" style="border-left-color:${C[k].col}"><div class="cchd"><div class="ccico">${C[k].ico}</div><div><div class="cczh">${C[k].zh}</div><div class="ccen">${C[k].en}</div></div></div><div class="ccbar"><div class="ccfill" style="background:${C[k].col};width:${pct}%"></div></div><div class="ccpct" style="color:${C[k].col}">${pct}%</div><span class="rbadge ${rc}">${rl}</span></div>`;
+  }).join('');
+  const top3=nz.slice(0,3).map(([k])=>k);
+  document.getElementById('rl').innerHTML=top3.map(k=>{
+    const r=R[k];
+    return`<div class="reccard"><h4 style="color:${C[k].col}">${r.t}</h4><p><strong>🧪 建議檢測 Recommended Tests：</strong></p><ul>${r.ts.map(t=>`<li>${t}</li>`).join('')}</ul><p><strong>💡 行動建議：</strong>${r.a}</p></div>`;
+  }).join('')+(nz.length>3?'<p style="font-size:.79rem;color:#718096;margin-top:8px">以上顯示前三名類別建議，其餘類別亦請諮詢醫師評估。</p>':'');
+
+  // ── Build aromatherapy finder URL ────────────────────────────────────
+  const AROMA_URL='https://myoneme-wang.github.io/aromatherapy-oil-finder/';
+  const toxinParam=nz.map(([k])=>k).join(',');
+  const aromaBtn=document.getElementById('aroma-link-btn');
+  if(aromaBtn){
+    aromaBtn.href=AROMA_URL+'?toxins='+encodeURIComponent(toxinParam);
+    document.getElementById('aroma-link-wrap').style.display='block';
+  }
+  res.scrollIntoView({behavior:'smooth'});
+}
+
+function rst(){
+  document.querySelectorAll('input[type=checkbox]').forEach(cb=>{cb.checked=false;const l=document.getElementById('L-'+cb.id);if(l)l.classList.remove('ck');});
+  document.getElementById('cc').textContent='0';
+  document.getElementById('pf').style.width='0%';
+  document.getElementById('res').style.display='none';
+  if(pie){pie.destroy();pie=null;}
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
